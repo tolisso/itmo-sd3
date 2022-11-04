@@ -3,6 +3,7 @@ package ru.akirakozov.sd.refactoring.servlet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.akirakozov.sd.refactoring.TestDatabaseContext;
+import ru.akirakozov.sd.refactoring.database.ProductRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +19,8 @@ import static org.mockito.Mockito.*;
 class GetProductServletTest {
 
     private static final String TEST_CONNECTION_URL = "jdbc:sqlite:GetProductServletTest.test";
-    private final GetProductsServlet servlet = new GetProductsServlet(TEST_CONNECTION_URL);
+    ProductRepository productRepository = new ProductRepository(TEST_CONNECTION_URL);
+    private final GetProductsServlet servlet = new GetProductsServlet(productRepository);
     private final TestDatabaseContext testDatabaseContext = new TestDatabaseContext(TEST_CONNECTION_URL);
 
     @BeforeEach

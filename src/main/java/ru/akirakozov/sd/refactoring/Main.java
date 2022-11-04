@@ -3,6 +3,7 @@ package ru.akirakozov.sd.refactoring;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import ru.akirakozov.sd.refactoring.database.ProductRepository;
 import ru.akirakozov.sd.refactoring.servlet.AddProductServlet;
 import ru.akirakozov.sd.refactoring.servlet.GetProductsServlet;
 import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
@@ -35,9 +36,10 @@ public class Main {
         context.setContextPath("/");
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(new AddProductServlet(DATABASE_URL)), "/add-product");
-        context.addServlet(new ServletHolder(new GetProductsServlet(DATABASE_URL)),"/get-products");
-        context.addServlet(new ServletHolder(new QueryServlet(DATABASE_URL)),"/query");
+        ProductRepository productRepository = new ProductRepository(DATABASE_URL);
+        context.addServlet(new ServletHolder(new AddProductServlet(productRepository)), "/add-product");
+        context.addServlet(new ServletHolder(new GetProductsServlet(productRepository)),"/get-products");
+        context.addServlet(new ServletHolder(new QueryServlet(productRepository)),"/query");
 
         server.start();
         server.join();
