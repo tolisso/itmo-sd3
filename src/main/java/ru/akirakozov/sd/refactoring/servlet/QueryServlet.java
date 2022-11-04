@@ -1,16 +1,11 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.database.ProductRepository;
-import ru.akirakozov.sd.refactoring.dto.ProductDto;
+import ru.akirakozov.sd.refactoring.util.ResponseWrapper;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 /**
  * @author akirakozov
@@ -24,43 +19,55 @@ public class QueryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         String command = request.getParameter("command");
 
         if ("max".equals(command)) {
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("<h1>Product with max price: </h1>");
-
-            ProductDto maxProduct = productRepository.getMax();
-            response.getWriter().println(maxProduct.getName() + "\t" + maxProduct.getPrice() + "</br>");
-            response.getWriter().println("</body></html>");
-
+            max(response);
         } else if ("min".equals(command)) {
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("<h1>Product with min price: </h1>");
-
-            ProductDto minProduct = productRepository.getMin();
-            response.getWriter().println(minProduct.getName() + "\t" + minProduct.getPrice() + "</br>");
-            response.getWriter().println("</body></html>");
-
+            min(response);
         } else if ("sum".equals(command)) {
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("Summary price: ");
-
-            response.getWriter().println(productRepository.sum());
-            response.getWriter().println("</body></html>");
+            sum(response);
         } else if ("count".equals(command)) {
-            response.getWriter().println("<html><body>");
-            response.getWriter().println("Number of products: ");
-
-            response.getWriter().println(productRepository.count());
-            response.getWriter().println("</body></html>");
+            count(response);
         } else {
-            response.getWriter().println("Unknown command: " + command);
+            notFoundCommand(response, command);
         }
-
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 
+    private void max(HttpServletResponse response) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, true)) {
+            responseWrapper.println("<h1>Product with max price: </h1>");
+            responseWrapper.print(productRepository.getMax());
+        }
+    }
+
+    private void min(HttpServletResponse response) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, true)) {
+            responseWrapper.println("<h1>Product with min price: </h1>");
+            responseWrapper.print(productRepository.getMin());
+        }
+    }
+
+    private void sum(HttpServletResponse response) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, true)) {
+            responseWrapper.println("Summary price: ");
+            responseWrapper.println(String.valueOf(productRepository.sum()));
+        }
+    }
+
+    private void count(HttpServletResponse response) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, true)) {
+            responseWrapper.println("Number of products: ");
+            responseWrapper.println(String.valueOf(productRepository.count()));
+        }
+    }
+
+    private void notFoundCommand(HttpServletResponse response, String command) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, false)) {
+           responseWrapper.println("Unknown command: " + command);
+        }
+    }
 }
+
+

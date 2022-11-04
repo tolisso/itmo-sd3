@@ -2,15 +2,11 @@ package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.database.ProductRepository;
 import ru.akirakozov.sd.refactoring.dto.ProductDto;
+import ru.akirakozov.sd.refactoring.util.ResponseWrapper;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -25,16 +21,15 @@ public class GetProductsServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.getWriter().println("<html><body>");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        try (ResponseWrapper responseWrapper = new ResponseWrapper(response, true)) {
+            List<ProductDto> products = productRepository.findAll();
+            for (ProductDto product : products) {
+                responseWrapper.print(product);
+            }
 
-        List<ProductDto> products = productRepository.findAll();
-        for (ProductDto product: products) {
-            response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
         }
-        response.getWriter().println("</body></html>");
-
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
